@@ -3,16 +3,20 @@ var choo = require('choo')
 
 css('tachyons')
 
+css('./style/animate.scss')
+css('./style/icon.scss')
+css('./style/index.scss')
+
 var app = choo()
+
 if (process.env.NODE_ENV !== 'production') {
   app.use(require('choo-devtools')())
 } else {
   app.use(require('choo-service-worker')())
 }
 
-app.use(require('./stores/clicks'))
+app.use(require('./store'))
 
-app.route('/', require('./views/main'))
-app.route('/*', require('./views/404'))
+app.route('/', require('./view'))
 
-module.exports = app.mount('body')
+app.mount('body')

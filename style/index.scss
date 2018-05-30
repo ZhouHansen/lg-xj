@@ -1,0 +1,46 @@
+@import './function.scss';
+
+@import url('https://fonts.googleapis.com/css?family=Lato|Lora');
+
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+.purple-blue {
+  color: #5677d0;
+}
+.b--purple-blue{
+  border-color: #5677d0;
+}
+
+.pv012{
+  padding-top: rem(12);
+  padding-bottom: rem(12);
+}
+
+.bg-n-white{
+  background: #fafafc;
+}
+
+.hide{
+  visibility: hidden;
+}
+
+.trt-half{
+  transform: translateY(-50%);
+}
+
+.trr-half{
+  transform: translateX(50%);
+}
+
+.monospace{
+  font-family: monospace;
+}
+
+.bg-purple-blue{
+  background-color: #5677d0;
+}
+
+.bw05{
+  border-width: 0.5px;
+}
