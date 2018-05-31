@@ -71,13 +71,14 @@ class QSubmit extends Nanocomponent {
 
   loading () {
     var data = {
-      num: Number(this.state.num),
+      id: Number(this.state.id),
+      villageId: Number(this.state.villageId),
       score: this.state.score,
       photo: this.state.photo,
       date: new Date().getTime()
     }
 
-    postData('polling', data, () => {
+    postData(data, () => {
       this.machineFn('RESOLVE')()
     }, () => {
       this.machineFn('REJECT')()
@@ -196,12 +197,9 @@ class Component extends Nanocomponent {
     this.qCamera = new QCamera(state, emit)
     this.qSubmit = new QSubmit(state, emit)
 
-    if (state.num) {
-      this.num = state.num
-    } else {
-      this.num = state.query.num
-      emit('state:num', this.num)
-    }
+    this.num = state.query.num
+    emit('state:id', state.query.id)
+    emit('state:villageId', state.query.villageId)
   }
 
   createElement () {
