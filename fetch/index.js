@@ -19,11 +19,7 @@ module.exports = {
     .then(datas => {
       var cunmin = datas[0]
 
-      if (!cunmin.score) {
-        cunmin.score = 0
-      }
-
-      cunmin.score += data.score
+      cunmin[`score${data.score}`] += 1
 
       return fetch(url('cunmin', JSON.stringify({ 'id': data.id })), {
         method: 'put',
@@ -40,11 +36,7 @@ module.exports = {
     .then(datas => {
       var village = datas[0]
 
-      if (!village.score) {
-        village.score = 0
-      }
-
-      village.score += data.score
+      village[`score${data.score}`] += 1
 
       return fetch(url('village', JSON.stringify({ 'id': data.villageId })), {
         method: 'put',
