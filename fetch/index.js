@@ -5,23 +5,56 @@ module.exports = {
   postData (data, resolve, reject) {
     resolve = resolve ? resolve : function (){}
     reject = reject ? reject : function (){}
-    var villageId = data.villageId
-    delete data.villageId
     fetch(url('polling'), {
       method: 'post',
       headers: {
-        "Content-type": "application/json;charset=utf-8"
+        'Content-type': 'application/json;charset=utf-8'
       },
       body: JSON.stringify(data)
     })
     .then(() => {
-      return fetch(url('cunmin', JSON.stringify({ 'villageId': villageId })))
+      return fetch(url('cunmin', JSON.stringify({ 'id': data.id })))
     })
     .then(res => res.json())
-    .then(data => {
-      console.log(data)
-      resolve()
+    .then(datas => {
+      var cunmin = datas[0]
+
+      if (!cunmin.score) {
+        cunmin.score = 0
+      }
+
+      cunmin.score += data.score
+
+      return fetch(url('cunmin', JSON.stringify({ 'id': data.id })), {
+        method: 'put',
+        headers: {
+          'Content-type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(cunmin)
+      })
     })
+    .then(() => {
+      return fetch(url('village', JSON.stringify({ 'id': data.villageId })))
+    })
+    .then(res => res.json())
+    .then(datas => {
+      var village = datas[0]
+
+      if (!village.score) {
+        village.score = 0
+      }
+
+      village.score += data.score
+
+      return fetch(url('village', JSON.stringify({ 'id': data.villageId })), {
+        method: 'put',
+        headers: {
+          'Content-type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(village)
+      })
+    })
+    .then(resolve)
     .catch(reject)
   }
 }
