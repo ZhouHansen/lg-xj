@@ -2,7 +2,9 @@ module.exports = (state, emitter) => {
   const INIT_DATA = {
     photo: null,
     fetchState: 'idle',
+    keyState: 'idle',
     id: null,
+    key: null,
     score: 3
   }
 
@@ -20,9 +22,17 @@ module.exports = (state, emitter) => {
     state.score = score
   })
 
+  emitter.on('state:key', key => {
+    state.key = key
+  })
+
   emitter.on('state:fetchState', fetchState => {
     state.fetchState = fetchState
   })
+
+  emitter.on('state:keyState', keyState => {
+    state.keyState = keyState
+  })  
 
   emitter.on('state:photo', photo => {
     state.photo = photo

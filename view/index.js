@@ -2,11 +2,104 @@ var html = require('choo/html')
 var Nanocomponent = require('choo/component')
 var ImageCompressor = require('image-compressor.js')
 
-const { postData } = require('../fetch')
+const { postData, postKey } = require('../fetch')
 
 var TITLE = '分类记录'
 
 module.exports = view
+
+class QkeySubmit extends Nanocomponent {
+  constructor (state, emit) {
+    super()
+    this.state = state
+    this.emit = emit
+    this.submit = this.submit.bind(this)
+    this.machineFn= this.machineFn.bind(this)
+    this.machine = {
+      idle: {
+        CLICK: 'loading'
+      },
+      loading: {
+        RESOLVE: 'goat',
+        REJECT: 'error'
+      },
+      error: {
+        CLICK: 'loading'
+      }
+    }
+    this.command = {
+      loading: this.loading.bind(this),
+      goat: () => {
+
+      },
+      error: () => {}
+    }
+    this.text = {
+      idle: '提交',
+      loading: '提交中...',
+      goat: '提交成功',
+      error: '号码错误'
+    }
+  }
+
+  loading () {
+    var key = document.getElementById('key').value
+
+    postKey(JSON.stringify({ key }), (datas) => {
+      if (datas.length) {
+        var data = datas[0]
+        this.emit('state:id', data.id)
+        this.emit('state:villageId', data.villageId)
+        this.emit('state:key', data.key)
+
+        localStorage.setItem('ljcz:id', data.id)
+        localStorage.setItem('ljcz:villageId', data.villageId)
+        localStorage.setItem('ljcz:key', data.key)
+
+        this.machineFn('RESOLVE')()
+        setTimeout(() => {
+          this.emit('render')
+        }, 500)
+      } else {
+        this.machineFn('REJECT')()
+      }
+    }, () => {
+      this.machineFn('REJECT')()
+    })
+  }
+
+  createElement () {
+    return html`
+      <button
+        onclick=${this.submit()}
+        class='bn bg-purple-blue h2 br2 white'>
+        ${this.text[this.state.keyState]}
+      </button>
+    `
+  }
+
+  submit () {
+    return this.machineFn('CLICK')
+  }
+
+  machineFn (action) {
+    return () => {
+      var nextState = this.transition(this.state.keyState, action)
+      if (!nextState) return
+      this.emit('state:keyState', nextState)
+      this.command[nextState]()
+      this.render()
+    }
+  }
+
+  transition (s, a) {
+    return this.machine[s][a]
+  }
+
+  update () {
+    return true
+  }
+}
 
 class QSubmit extends Nanocomponent {
   constructor (state, emit) {
@@ -196,6 +289,7 @@ class Component extends Nanocomponent {
     this.qScore = new QScore(state, emit)
     this.qCamera = new QCamera(state, emit)
     this.qSubmit = new QSubmit(state, emit)
+    this.qkeySubmit = new QkeySubmit(state, emit)
 
     this.num = state.query.num
     emit('state:id', state.query.id)
@@ -204,18 +298,39 @@ class Component extends Nanocomponent {
 
   createElement () {
     var score = this.state.score
+
+    if (localStorage.getItem('ljcz:id')) {
+      this.emit('state:id', localStorage.getItem('ljcz:id'))
+      this.emit('state:villageId', localStorage.getItem('ljcz:villageId'))
+      this.emit('state:key', localStorage.getItem('ljcz:key'))
+    }
+        
     return html`
       <main class='w-100 flex flex-column flex-auto bg-dz items-center'>
         <header class='w-100 tc purple-blue f3 bold05 bg-white pv2 tracked'>分类记录</header>
-        <section class='w-90'>
-          <p class='f5 navy'>
-            住户编号
-            <span class='purple-blue monospace f3 b'>A${this.num}</span>
-            ${this.qSubmit.render()}
-          </p>
-          ${this.qScore.render()}
-          ${score !== 1 ? this.qCamera.render() : ''}
-        </section>
+        ${
+          this.state.key ?
+          html`
+            <section class='w-90'>
+              <p class='f5 navy'>
+                住户编号
+                <span class='purple-blue monospace f3 b'>A${this.num}</span>
+                ${this.qSubmit.render()}
+              </p>
+              ${this.qScore.render()}
+              ${score !== 1 ? this.qCamera.render() : ''}
+            </section>
+          ` :
+          html`
+            <section class='w-90'>
+              <p class='w-100 f5 navy bb pb3 bw1 b--light-gray'>
+                ${this.qkeySubmit.render()}
+              </p>
+              <input id='key' class='semantic-input' type='text' placeholder='请输入巡检员号' />
+            </section>
+          `
+        }
+
       </main>
     `
   }

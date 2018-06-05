@@ -2,15 +2,49 @@ var host = 'https://api.mlab.com/api/1/databases/my-db1/collections/'
 var apiKey = 'q4vsE-BwyJnqZDJSC_d1240H82QBoKVv'
 
 module.exports = {
+  postKey (q, resolve, reject) {
+    resolve = resolve ? resolve : function (){}
+    reject = reject ? reject : function (){}
+
+    fetch(url('pollingman', q))
+    .then(res => res.json())
+    .then(resolve)
+    .catch(reject)
+  },
+
   postData (data, resolve, reject) {
     resolve = resolve ? resolve : function (){}
     reject = reject ? reject : function (){}
+    var pollingData = JSON.parse(JSON.stringify(data))
+
+    if (pollingData.photo) {
+      pollingData.photo = true
+    }
+
     fetch(url('polling'), {
       method: 'post',
       headers: {
         'Content-type': 'application/json;charset=utf-8'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(pollingData)
+    })
+    .then(() => {
+      if (data.photo) {
+        var obj = {
+          photo: data.photo,
+          id: data.id,
+          date: data.date
+        }
+        return fetch(url('photo'), {
+          method: 'post',
+          headers: {
+            'Content-type': 'application/json;charset=utf-8'
+          },
+          body: JSON.stringify(obj)
+        })
+      } else {
+        return true
+      }
     })
     .then(() => {
       return fetch(url('cunmin', JSON.stringify({ 'id': data.id })))
