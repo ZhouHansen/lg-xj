@@ -11,6 +11,15 @@ module.exports = {
     .then(resolve)
     .catch(reject)
   },
+  
+  getData (collection, q, resolve, reject) {
+    resolve = resolve ? resolve : function (){}
+    reject = reject ? reject : function (){}
+    fetch(url(collection, q))
+    .then(res => res.json())
+    .then(resolve)
+    .catch(reject)
+  },
 
   postData (data, resolve, reject) {
     resolve = resolve ? resolve : function (){}

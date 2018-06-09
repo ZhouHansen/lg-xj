@@ -5,6 +5,10 @@ module.exports = (state, emitter) => {
     keyState: 'idle',
     id: null,
     key: null,
+    villageId: null,
+    num: null,
+    name: null,
+    loading: true,
     score: 3
   }
 
@@ -32,9 +36,25 @@ module.exports = (state, emitter) => {
 
   emitter.on('state:keyState', keyState => {
     state.keyState = keyState
-  })  
+  })
+
+  emitter.on('state:num', num => {
+    state.num = num
+  })
+
+  emitter.on('state:name', name => {
+    state.name = name
+  })
 
   emitter.on('state:photo', photo => {
     state.photo = photo
+  })
+
+  emitter.on('state:loading', loading => {
+    state.loading = loading
+  })
+
+  emitter.on('state:init', () => {
+    Object.assign(state, INIT_DATA)
   })
 }

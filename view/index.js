@@ -2,11 +2,40 @@ var html = require('choo/html')
 var Nanocomponent = require('choo/component')
 var ImageCompressor = require('image-compressor.js')
 
-const { postData, postKey } = require('../fetch')
+const { postData, postKey, getData } = require('../fetch')
 
 var TITLE = '分类记录'
 
 module.exports = view
+
+class QLogout extends Nanocomponent {
+  constructor (state, emit) {
+    super()
+    this.state = state
+    this.emit = emit
+    this.handleClick = this.handleClick.bind(this)
+  }
+
+  createElement () {
+    return html`
+      <button
+        onclick=${this.handleClick}
+        class='fr bn bg-purple-blue h2 br2 white'>
+        退出
+      </button>
+    `
+  }
+
+  handleClick () {
+    localStorage.removeItem('ljcz:key')
+    this.emit('state:init')
+    this.emit('render')
+  }
+
+  update () {
+    return true
+  }
+}
 
 class QkeySubmit extends Nanocomponent {
   constructor (state, emit) {
@@ -45,15 +74,11 @@ class QkeySubmit extends Nanocomponent {
   loading () {
     var key = document.getElementById('key').value
 
-    postKey(JSON.stringify({ key }), (datas) => {
+    postKey(JSON.stringify({ key }), datas => {
       if (datas.length) {
         var data = datas[0]
-        this.emit('state:id', data.id)
-        this.emit('state:villageId', data.villageId)
         this.emit('state:key', data.key)
 
-        localStorage.setItem('ljcz:id', data.id)
-        localStorage.setItem('ljcz:villageId', data.villageId)
         localStorage.setItem('ljcz:key', data.key)
 
         this.machineFn('RESOLVE')()
@@ -142,7 +167,7 @@ class QSubmit extends Nanocomponent {
     return html`
       <button
         onclick=${this.submit()}
-        class='fr bn bg-purple-blue h2 br2 white'>
+        class='bn bg-purple-blue h2 br2 white'>
         ${this.text[this.state.fetchState]}
       </button>
     `
@@ -290,37 +315,47 @@ class Component extends Nanocomponent {
     this.qCamera = new QCamera(state, emit)
     this.qSubmit = new QSubmit(state, emit)
     this.qkeySubmit = new QkeySubmit(state, emit)
+    this.qLogout = new QLogout(state, emit)
 
-    this.num = state.query.num
     emit('state:id', state.query.id)
-    emit('state:villageId', state.query.villageId)
   }
 
   createElement () {
     var score = this.state.score
 
-    if (localStorage.getItem('ljcz:id')) {
-      this.emit('state:id', localStorage.getItem('ljcz:id'))
-      this.emit('state:villageId', localStorage.getItem('ljcz:villageId'))
+    if (localStorage.getItem('ljcz:key')) {
       this.emit('state:key', localStorage.getItem('ljcz:key'))
     }
-        
+
     return html`
       <main class='w-100 flex flex-column flex-auto bg-dz items-center'>
         <header class='w-100 tc purple-blue f3 bold05 bg-white pv2 tracked'>分类记录</header>
         ${
           this.state.key ?
-          html`
-            <section class='w-90'>
-              <p class='f5 navy'>
-                住户编号
-                <span class='purple-blue monospace f3 b'>A${this.num}</span>
-                ${this.qSubmit.render()}
-              </p>
-              ${this.qScore.render()}
-              ${score !== 1 ? this.qCamera.render() : ''}
-            </section>
-          ` :
+          (
+            this.state.loading ?
+            html`
+              <section class='w-90'>
+                <div class='tc mt4'>
+                  <i class='icon icon_spinner icon-40'></i>
+                </div>
+              </section>
+            ` :
+            html`
+              <section class='w-90'>
+                <p class='f5 navy'>
+                  <span class='purple-blue monospace f3 b'>${this.state.name}</span>
+                  <span class='fr'>住户编号 <span class='purple-blue monospace f3 b'>${this.state.num}</span></span>
+                </p>
+                <p class='f5 navy'>
+                  ${this.qSubmit.render()}
+                  ${this.qLogout.render()}
+                </p>
+                ${this.qScore.render()}
+                ${score !== 1 ? this.qCamera.render() : ''}
+              </section>
+            `
+          ) :
           html`
             <section class='w-90'>
               <p class='w-100 f5 navy bb pb3 bw1 b--light-gray'>
@@ -333,6 +368,22 @@ class Component extends Nanocomponent {
 
       </main>
     `
+  }
+
+  load () {
+    if (this.state.loading && this.state.key) {
+      var id = Number(this.state.id)
+      getData('cunmin', JSON.stringify({ id }), datas => {
+        var data = datas[0]
+        this.emit('state:villageId', data.villageId)
+        this.emit('state:num', data.num)
+        this.emit('state:name', data.name)
+        this.emit('state:loading', false)
+        this.emit('render')
+      }, err => {
+        console.log(err)
+      })
+    }
   }
 
   update () {

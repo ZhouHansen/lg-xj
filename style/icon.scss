@@ -69,6 +69,10 @@ $icon-30-size: rem(30);
     background-image: url("../../assets/icon/close.png");
   }
 
+  &.icon_spinner {
+    background-image: url("../../assets/icon/spinner.gif");
+  }  
+
   &.icon-60{
     width: $icon-60-size;
     height: $icon-60-size;
