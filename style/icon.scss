@@ -5,6 +5,7 @@ $icon-height: rem(45);
 
 $icon-60-size: rem(60);
 $icon-30-size: rem(30);
+$icon-25-size: rem(25);
 
 .icon{
   display: inline-block;
@@ -71,7 +72,11 @@ $icon-30-size: rem(30);
 
   &.icon_spinner {
     background-image: url("../../assets/icon/spinner.gif");
-  }  
+  }
+
+  &.icon_agree {
+    background-image: url("../../assets/icon/agree.png");
+  }
 
   &.icon-60{
     width: $icon-60-size;
@@ -83,5 +88,11 @@ $icon-30-size: rem(30);
     width: $icon-30-size;
     height: $icon-30-size;
     background-size: $icon-30-size $icon-30-size;
+  }
+
+  &.icon-25{
+    width: $icon-25-size;
+    height: $icon-25-size;
+    background-size: $icon-25-size $icon-25-size;
   }
 }

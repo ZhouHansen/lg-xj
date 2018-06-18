@@ -7,6 +7,7 @@ module.exports = (state, emitter) => {
     key: null,
     villageId: null,
     num: null,
+    phone: null,
     name: null,
     loading: true,
     score: 3
@@ -44,6 +45,10 @@ module.exports = (state, emitter) => {
 
   emitter.on('state:name', name => {
     state.name = name
+  })
+
+  emitter.on('state:phone', phone => {
+    state.phone = phone
   })
 
   emitter.on('state:photo', photo => {

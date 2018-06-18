@@ -193,6 +193,9 @@ class QSubmit extends Nanocomponent {
       villageId: Number(this.state.villageId),
       score: this.state.score,
       photo: this.state.photo,
+      name: this.state.name,
+      num: this.state.num,
+      phone: this.state.phone,
       date: new Date().getTime()
     }
 
@@ -221,19 +224,26 @@ class QCamera extends Nanocomponent {
   }
 
   createElement () {
-    return html`
-      <div class='mt3 w-100'>
-        <label for='camera' class='${!this.state.photo ? "" : "dn"}'>
-          <i class='icon icon-60 icon_camera'>
-            <input id='camera' type='file' accept='image/*' capture='camera' class='hide w1'/>
-          </i>
-        </label>
-        <div class='w4 h4 db ba bw2 b--purple-blue relative overflow-hidden ${!this.state.photo ? "hide" : ""}'>
-          <i onclick=${this.close()} class='icon icon_close icon-30 absolute top-0 right-0'></i>
-          <img src=${this.state.photo} />
+    if (this.state.score === 2 || this.state.score === 3) {
+      return html`
+        <div class='mt3 w-100'>
+          <label for='camera' class='${!this.state.photo ? "" : "dn"}'>
+            <i class='icon icon-60 icon_camera'>
+              <input id='camera' type='file' accept='image/*' capture='camera' class='hide w1'/>
+            </i>
+          </label>
+          <div class='w4 h4 db ba bw2 b--purple-blue relative overflow-hidden ${!this.state.photo ? "hide" : ""}'>
+            <i onclick=${this.close()} class='icon icon_close icon-30 absolute top-0 right-0'></i>
+            <img src=${this.state.photo} />
+          </div>
         </div>
-      </div>
-    `
+      `
+    } else {
+      return html`
+        <div class='mt3 w-100'></div>
+      `
+    }
+
   }
 
   load () {
@@ -271,31 +281,75 @@ class QCamera extends Nanocomponent {
   }
 }
 
-class QScore extends Nanocomponent {
-  constructor (state, emit) {
+class QNone extends Nanocomponent {
+  constructor (state, emit, qScore, qCamera) {
     super()
     this.state = state
     this.emit = emit
-    this.score = this.score.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+    this.qScore = qScore
+    this.qCamera = qCamera
   }
 
   createElement () {
-    var score = this.state.score
     return html`
-      <div class='w-100 bt bw1 b--light-gray pt3 mt2'>
-        <div class='w-60 flex justify-between'>
-          <i onclick=${this.score(1)} class='icon ${score === 1 ? "icon_good_active animated pulse" : "icon_good"}'></i>
-          <i onclick=${this.score(2)} class='icon ${score === 2 ? "icon_soso_active animated pulse" : "icon_soso"}'></i>
-          <i onclick=${this.score(3)} class='icon ${score === 3 ? "icon_bad_active animated pulse" : "icon_bad"}'></i>
+      <div class='w-100 bt bw1 b--light-gray pt3 mt2 f4 flex items-center'>
+        <span>没有垃圾:</span>
+        <div
+          onclick=${this.handleClick}
+          class='ml2 bg-white br2 b--blue ba bw015 w2 h2 flex items-center justify-center'>
+          ${this.state.score === 10 ? html`<i class='icon icon_agree icon-25'></i>` : html`<div></div>`}
         </div>
       </div>
     `
   }
 
+  handleClick () {
+    var score = this.state.score === 10 ? 3 : 10
+
+    this.emit('state:score', score)
+    this.qScore.render()
+    this.qCamera.render()
+    this.render()
+  }
+
+  update () {
+    return true
+  }
+}
+
+class QScore extends Nanocomponent {
+  constructor (state, emit, qCamera) {
+    super()
+    this.state = state
+    this.emit = emit
+    this.score = this.score.bind(this)
+    this.qCamera = qCamera
+  }
+
+  createElement () {
+    var score = this.state.score
+
+    if (score === 10) {
+      return html`<div class='w-100 pt3 mt2'></div>`
+    } else {
+      return html`
+        <div class='w-100 pt3 mt2'>
+          <div class='w-60 flex justify-between'>
+            <i onclick=${this.score(1)} class='icon ${score === 1 ? "icon_good_active animated pulse" : "icon_good"}'></i>
+            <i onclick=${this.score(2)} class='icon ${score === 2 ? "icon_soso_active animated pulse" : "icon_soso"}'></i>
+            <i onclick=${this.score(3)} class='icon ${score === 3 ? "icon_bad_active animated pulse" : "icon_bad"}'></i>
+          </div>
+        </div>
+      `
+    }
+  }
+
   score (score) {
     return e => {
       this.emit('state:score', score)
-      this.emit('render')
+      this.qCamera.render()
+      this.render()
     }
   }
 
@@ -311,11 +365,12 @@ class Component extends Nanocomponent {
     this.unHeightFix = true
     this.state = state
     this.emit = emit
-    this.qScore = new QScore(state, emit)
     this.qCamera = new QCamera(state, emit)
+    this.qScore = new QScore(state, emit, this.qCamera)
     this.qSubmit = new QSubmit(state, emit)
     this.qkeySubmit = new QkeySubmit(state, emit)
     this.qLogout = new QLogout(state, emit)
+    this.qNone = new QNone(state, emit, this.qScore, this.qCamera)
 
     emit('state:id', state.query.id)
   }
@@ -351,8 +406,9 @@ class Component extends Nanocomponent {
                   ${this.qSubmit.render()}
                   ${this.qLogout.render()}
                 </p>
+                ${this.qNone.render()}
                 ${this.qScore.render()}
-                ${score !== 1 ? this.qCamera.render() : ''}
+                ${this.qCamera.render()}
               </section>
             `
           ) :
@@ -378,6 +434,7 @@ class Component extends Nanocomponent {
         this.emit('state:villageId', data.villageId)
         this.emit('state:num', data.num)
         this.emit('state:name', data.name)
+        this.emit('state:phone', data.phone)
         this.emit('state:loading', false)
         this.emit('render')
       }, err => {
