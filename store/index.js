@@ -5,11 +5,14 @@ module.exports = (state, emitter) => {
     keyState: 'idle',
     id: null,
     key: null,
+    area: null,
     villageId: null,
+    showUnNormal: false,
     num: null,
     phone: null,
     name: null,
     loading: true,
+    unPolling: false,
     score: 3
   }
 
@@ -57,6 +60,18 @@ module.exports = (state, emitter) => {
 
   emitter.on('state:loading', loading => {
     state.loading = loading
+  })
+
+  emitter.on('state:showUnNormal', showUnNormal => {
+    state.showUnNormal = showUnNormal
+  })
+
+  emitter.on('state:unPolling', unPolling => {
+    state.unPolling = unPolling
+  })
+
+  emitter.on('state:area', area => {
+    state.area = area
   })
 
   emitter.on('state:init', () => {

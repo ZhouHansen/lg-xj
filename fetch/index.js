@@ -11,7 +11,7 @@ module.exports = {
     .then(resolve)
     .catch(reject)
   },
-  
+
   getData (collection, q, resolve, reject) {
     resolve = resolve ? resolve : function (){}
     reject = reject ? reject : function (){}
@@ -63,6 +63,7 @@ module.exports = {
       var cunmin = datas[0]
 
       cunmin[`score${data.score}`] += 1
+      cunmin.lastUpdate = new Date().getTime()
 
       return fetch(url('cunmin', JSON.stringify({ 'id': data.id })), {
         method: 'put',

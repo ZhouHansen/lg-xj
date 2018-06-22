@@ -8,6 +8,112 @@ var TITLE = '分类记录'
 
 module.exports = view
 
+class QNormal extends Nanocomponent {
+  constructor (state, emit, qUnpolling) {
+    super()
+    this.state = state
+    this.emit = emit
+    this.handleClick = this.handleClick.bind(this)
+    this.qUnpolling = qUnpolling
+  }
+
+  createElement () {
+    return html`
+      <div class='w-100 f4 flex items-center'>
+        <span>是否显示非常住户:</span>
+        <div
+          onclick=${this.handleClick}
+          class='ml2 bg-white br2 b--blue ba bw015 w2 h2 flex items-center justify-center'>
+          ${this.state.showUnNormal ? html`<i class='icon icon_agree icon-25'></i>` : html`<div></div>`}
+        </div>
+      </div>
+    `
+  }
+
+  handleClick () {
+    var showUnNormal = !this.state.showUnNormal
+
+    this.emit('state:showUnNormal', showUnNormal)
+    this.qUnpolling.render()
+  }
+
+  update () {
+    return true
+  }
+}
+
+class QUnpolling extends Nanocomponent {
+  constructor (state, emit) {
+    super()
+    this.state = state
+    this.emit = emit
+    this.qNormal = new QNormal(state, emit, this)
+  }
+
+  createElement () {
+    return html`
+      <main class='w-100 flex bt bw1 b--light-gray flex-column flex-auto bg-dz mt1'>
+        <p class='f5 navy'>
+          <span class='purple-blue monospace f3 b'>尚未巡检家庭</span>
+        </p>
+        ${this.qNormal.render()}
+        ${this.state.unPolling ?
+          html`
+            <ul class='list pa0 f3'>
+              ${
+                this.state.unPolling.map(d => {
+                  if (d.isNormal && !this.state.showUnNormal) {
+                    return html`
+                      <div></div>
+                    `
+                  }
+
+                  var midnight = new Date()
+
+                  midnight.setHours(0,0,0,0)
+
+                  if (d.lastUpdate && d.lastUpdate > midnight.getTime()) {
+                    return html`
+                      <div></div>
+                    `
+                  }
+
+                  return html`
+                    <li class='mr2 dib'>${d.area + d.num}</li>
+                  `
+                })
+              }
+            </ul>
+          ` :
+          html`
+            <section class='w-90'>
+              <div class='tc mt4'>
+                <i class='icon icon_spinner icon-40'></i>
+              </div>
+            </section>
+          `
+        }
+      </main>
+    `
+  }
+
+  load () {
+    var area = this.state.area
+    var villageId = this.state.villageId
+
+    getData('cunmin', JSON.stringify({ area, villageId }), datas => {
+      this.emit('state:unPolling', datas)
+      this.render()
+    }, err => {
+      console.log(err)
+    })
+  }
+
+  update () {
+    return true
+  }
+}
+
 class QLogout extends Nanocomponent {
   constructor (state, emit) {
     super()
@@ -232,7 +338,7 @@ class QCamera extends Nanocomponent {
               <input id='camera' type='file' accept='image/*' capture='camera' class='hide w1'/>
             </i>
           </label>
-          <div class='w4 h4 db ba bw2 b--purple-blue relative overflow-hidden ${!this.state.photo ? "hide" : ""}'>
+          <div class='w4 h4 ba bw2 b--purple-blue relative overflow-hidden ${!this.state.photo ? "hide dn" : "db"}'>
             <i onclick=${this.close()} class='icon icon_close icon-30 absolute top-0 right-0'></i>
             <img src=${this.state.photo} />
           </div>
@@ -371,7 +477,7 @@ class Component extends Nanocomponent {
     this.qkeySubmit = new QkeySubmit(state, emit)
     this.qLogout = new QLogout(state, emit)
     this.qNone = new QNone(state, emit, this.qScore, this.qCamera)
-
+    this.qUnpolling = new QUnpolling(state, emit)
     emit('state:id', state.query.id)
   }
 
@@ -409,6 +515,7 @@ class Component extends Nanocomponent {
                 ${this.qNone.render()}
                 ${this.qScore.render()}
                 ${this.qCamera.render()}
+                ${this.qUnpolling.render()}
               </section>
             `
           ) :
@@ -433,6 +540,7 @@ class Component extends Nanocomponent {
         var data = datas[0]
         this.emit('state:villageId', data.villageId)
         this.emit('state:num', data.num)
+        this.emit('state:area', data.area)
         this.emit('state:name', data.name)
         this.emit('state:phone', data.phone)
         this.emit('state:loading', false)
@@ -454,7 +562,7 @@ function view (state, emit) {
   var component = new Component(state, emit)
 
   return html`
-    <body class='w-100 h-100 overflow-hidden flex flex-column bg-n-white'>
+    <body class='w-100 flex flex-column bg-n-white'>
       ${component.render()}
     </body>
   `
