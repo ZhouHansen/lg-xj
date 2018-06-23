@@ -13,6 +13,7 @@ module.exports = (state, emitter) => {
     name: null,
     loading: true,
     unPolling: false,
+    lastUpdate: null,
     score: 3
   }
 
@@ -72,6 +73,10 @@ module.exports = (state, emitter) => {
 
   emitter.on('state:area', area => {
     state.area = area
+  })
+
+  emitter.on('state:lastUpdate', lastUpdate => {
+    state.lastUpdate = lastUpdate
   })
 
   emitter.on('state:init', () => {

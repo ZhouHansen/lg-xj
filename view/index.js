@@ -245,9 +245,13 @@ class QSubmit extends Nanocomponent {
       },
       loading: {
         RESOLVE: 'goat',
+        DUPLICATION: 'duplication',
         REJECT: 'error'
       },
       error: {
+        CLICK: 'loading'
+      },
+      duplication: {
         CLICK: 'loading'
       }
     }
@@ -259,13 +263,15 @@ class QSubmit extends Nanocomponent {
           win.close()
         }, 1000)
       },
-      error: () => {}
+      error: () => {},
+      duplication: () => {}
     }
     this.text = {
       idle: '提交',
       loading: '提交中...',
       goat: '提交成功',
-      error: '网络错误'
+      error: '网络错误',
+      duplication: '重复提交'
     }
   }
 
@@ -303,6 +309,15 @@ class QSubmit extends Nanocomponent {
       num: this.state.num,
       phone: this.state.phone,
       date: new Date().getTime()
+    }
+
+    var midnight = new Date()
+
+    midnight.setHours(0,0,0,0)
+
+    if (this.state.lastUpdate && this.state.lastUpdate > midnight.getTime()) {
+      this.machineFn('DUPLICATION')()
+      return
     }
 
     postData(data, () => {
@@ -399,13 +414,16 @@ class QNone extends Nanocomponent {
 
   createElement () {
     return html`
-      <div class='w-100 bt bw1 b--light-gray pt3 mt2 f4 flex items-center'>
-        <span>没有垃圾:</span>
-        <div
-          onclick=${this.handleClick}
-          class='ml2 bg-white br2 b--blue ba bw015 w2 h2 flex items-center justify-center'>
-          ${this.state.score === 10 ? html`<i class='icon icon_agree icon-25'></i>` : html`<div></div>`}
+      <div class='w-100 bt bw1 b--light-gray pt3 mt2 f4 flex items-center justify-between'>
+        <div class='w-50 flex items-center'>
+          <span>没有垃圾:</span>
+          <div
+            onclick=${this.handleClick}
+            class='ml2 bg-white br2 b--blue ba bw015 w2 h2 flex items-center justify-center'>
+            ${this.state.score === 10 ? html`<i class='icon icon_agree icon-25'></i>` : html`<div></div>`}
+          </div>
         </div>
+        <a href='https://lg-xjjg.github.io/' class='no-underline'>统计结果</a>
       </div>
     `
   }
@@ -541,6 +559,7 @@ class Component extends Nanocomponent {
         this.emit('state:villageId', data.villageId)
         this.emit('state:num', data.num)
         this.emit('state:area', data.area)
+        this.emit('state:lastUpdate', data.lastUpdate)
         this.emit('state:name', data.name)
         this.emit('state:phone', data.phone)
         this.emit('state:loading', false)
