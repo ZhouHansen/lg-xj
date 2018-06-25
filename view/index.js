@@ -62,7 +62,7 @@ class QUnpolling extends Nanocomponent {
             <ul class='list pa0 f3'>
               ${
                 this.state.unPolling.map(d => {
-                  if (d.isNormal && !this.state.showUnNormal) {
+                  if (!d.isNormal && !this.state.showUnNormal) {
                     return html`
                       <div></div>
                     `
