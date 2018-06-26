@@ -20,7 +20,7 @@ class QNormal extends Nanocomponent {
   createElement () {
     return html`
       <div class='w-100 f4 flex items-center'>
-        <span>是否显示非常住户:</span>
+        <span>显示非常住户:</span>
         <div
           onclick=${this.handleClick}
           class='ml2 bg-white br2 b--blue ba bw015 w2 h2 flex items-center justify-center'>
@@ -423,7 +423,7 @@ class QNone extends Nanocomponent {
             ${this.state.score === 10 ? html`<i class='icon icon_agree icon-25'></i>` : html`<div></div>`}
           </div>
         </div>
-        <a href='https://lg-xjjg.github.io/' class='no-underline'>统计结果</a>
+        <a href='https://lg-xjjg.github.io/'>统计结果</a>
       </div>
     `
   }
@@ -524,7 +524,11 @@ class Component extends Nanocomponent {
               <section class='w-90'>
                 <p class='f5 navy'>
                   <span class='purple-blue monospace f3 b'>${this.state.name}</span>
-                  <span class='fr'>住户编号 <span class='purple-blue monospace f3 b'>${this.state.num}</span></span>
+                  <span class='fr'>${this.state.villageName}
+                    <span class='purple-blue monospace f3 b'>
+                      ${' ' + this.state.area + this.state.num}
+                    </span>
+                  </span>
                 </p>
                 <p class='f5 navy'>
                   ${this.qSubmit.render()}
@@ -557,6 +561,7 @@ class Component extends Nanocomponent {
       getData('cunmin', JSON.stringify({ id }), datas => {
         var data = datas[0]
         this.emit('state:villageId', data.villageId)
+        this.emit('state:villageName', data.villageName)
         this.emit('state:num', data.num)
         this.emit('state:area', data.area)
         this.emit('state:lastUpdate', data.lastUpdate)

@@ -7,6 +7,7 @@ module.exports = (state, emitter) => {
     key: null,
     area: null,
     villageId: null,
+    villageName: null,
     showUnNormal: false,
     num: null,
     phone: null,
@@ -25,6 +26,10 @@ module.exports = (state, emitter) => {
 
   emitter.on('state:villageId', villageId => {
     state.villageId = villageId
+  })
+
+  emitter.on('state:villageName', villageName => {
+    state.villageName = villageName
   })
 
   emitter.on('state:score', score => {
