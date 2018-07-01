@@ -307,7 +307,6 @@ class QSubmit extends Nanocomponent {
       score: this.state.score,
       photo: this.state.photo,
       name: this.state.name,
-      area: this.state.area,
       num: this.state.num,
       phone: this.state.phone,
       date: new Date().getTime()
