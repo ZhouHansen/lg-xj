@@ -64,7 +64,7 @@ class QUnpolling extends Nanocomponent {
                 this.state.unPolling.map(d => {
                   if (!d.isNormal && !this.state.showUnNormal) {
                     return html`
-                      <div></div>
+                      <span></span>
                     `
                   }
 
@@ -73,8 +73,9 @@ class QUnpolling extends Nanocomponent {
                   midnight.setHours(0,0,0,0)
 
                   if (d.lastUpdate && d.lastUpdate > midnight.getTime()) {
+                    console.log(d.num)
                     return html`
-                      <div></div>
+                      <span></span>
                     `
                   }
 
