@@ -92,6 +92,64 @@ module.exports = {
     })
     .then(resolve)
     .catch(reject)
+  },
+
+  clearImage () {
+    var d = new Date()
+    d.setHours(0,0,0,0)
+    var yMidnight = d.getTime() - 24 * 1000 * 3600
+
+    fetch(url('clear'))
+    .then(res => res.json())
+    .then(datas => {
+      var clearDate = datas[0].date
+
+      if (clearDate === yMidnight) {
+        return false
+      }
+
+      return fetch(url('photo'))
+    })
+    .then(res => res.json())
+    .then(datas => {
+      datas = datas.filter(d => {
+        return d.date > yMidnight
+      })
+      return datas    
+    })
+    .then(datas => {
+      return fetch(url('photo'), {
+        method: 'put',
+        headers: {
+          'Content-type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(datas)     
+      })
+    })
+    .then(() => {
+      return fetch(url('polling', JSON.stringify({ date: { $lt: yMidnight }, photo: true })) + '&m=true', {
+        method: 'put',
+        headers: {
+          'Content-type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify( { "$set" : { "photo" : null } } )
+      })
+      .then(datas => {
+        console.log(datas)
+      })      
+    })
+    .then(() => {
+      return fetch(url('clear'), {
+        method: 'put',
+        headers: {
+          'Content-type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify([{date: yMidnight}])     
+      })         
+    })
+    .catch(err => {
+      console.log(err)
+    })
   }
 }
 

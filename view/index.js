@@ -2,7 +2,7 @@ var html = require('choo/html')
 var Nanocomponent = require('choo/component')
 var ImageCompressor = require('image-compressor.js')
 
-const { postData, postKey, getData } = require('../fetch')
+const { postData, postKey, getData, clearImage } = require('../fetch')
 
 var TITLE = '分类记录'
 
@@ -181,7 +181,7 @@ class QkeySubmit extends Nanocomponent {
   loading () {
     var key = document.getElementById('key').value
 
-    postKey(JSON.stringify({ key }), datas => {
+    postKey(JSON.stringify({ name: key }), datas => {
       if (datas.length) {
         var data = datas[0]
         this.emit('state:key', data.key)
@@ -545,7 +545,7 @@ class Component extends Nanocomponent {
               <p class='w-100 f5 navy bb pb3 bw1 b--light-gray'>
                 ${this.qkeySubmit.render()}
               </p>
-              <input id='key' class='semantic-input' type='text' placeholder='请输入巡检员号' />
+              <input id='key' class='semantic-input' type='text' placeholder='请输入巡检员姓名' />
             </section>
           `
         }
@@ -568,6 +568,7 @@ class Component extends Nanocomponent {
         this.emit('state:phone', data.phone)
         this.emit('state:loading', false)
         this.emit('render')
+        clearImage()
       }, err => {
         console.log(err)
       })
