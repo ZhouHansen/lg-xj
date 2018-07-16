@@ -14,6 +14,7 @@
     "choo": "^6.11.0",
     "choo-service-worker": "^2.4.0",
     "image-compressor.js": "^1.1.3",
+    "mitt": "^1.1.3",
     "sheetify": "^7.3.2",
     "sheetify-sass": "^2.1.0",
     "tachyons": "^4.9.1"

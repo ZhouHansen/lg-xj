@@ -15,6 +15,7 @@ module.exports = (state, emitter) => {
     loading: true,
     unPolling: false,
     lastUpdate: null,
+    isAble: false,
     score: 3
   }
 
@@ -23,6 +24,10 @@ module.exports = (state, emitter) => {
   emitter.on('state:id', id => {
     state.id = id
   })
+
+  emitter.on('state:isAble', isAble => {
+    state.isAble = isAble
+  })  
 
   emitter.on('state:villageId', villageId => {
     state.villageId = villageId

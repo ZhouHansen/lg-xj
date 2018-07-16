@@ -1,5 +1,7 @@
 var html = require('choo/html')
 var Nanocomponent = require('choo/component')
+var mitt = require('mitt')
+var amme = mitt()
 var ImageCompressor = require('image-compressor.js')
 
 const { postData, postKey, getData, clearImage } = require('../fetch')
@@ -277,7 +279,7 @@ class QSubmit extends Nanocomponent {
     return html`
       <button
         onclick=${this.submit()}
-        class='bn bg-purple-blue h2 br2 white'>
+        class='bn bg-purple-blue h2 br2 white ${this.state.isAble ? "" : "disabled"}'>
         ${this.text[this.state.fetchState]}
       </button>
     `
@@ -336,11 +338,12 @@ class QSubmit extends Nanocomponent {
 }
 
 class QCamera extends Nanocomponent {
-  constructor (state, emit) {
+  constructor (state, emit, qSubmit) {
     super()
     this.state = state
     this.emit = emit
     this.close = this.close.bind(this)
+    this.qSubmit = qSubmit
   }
 
   createElement () {
@@ -378,6 +381,8 @@ class QCamera extends Nanocomponent {
           var reader = new FileReader()
           reader.onload = function() {
             self.emit('state:photo', reader.result)
+            self.emit('state:isAble', true)
+            self.qSubmit.render()            
             self.render()
           }
           reader.readAsDataURL(blob)
@@ -392,6 +397,8 @@ class QCamera extends Nanocomponent {
   close () {
     return e => {
       this.emit('state:photo', null)
+      this.emit('state:isAble', false)
+      this.qSubmit.render()      
       this.render()
     }
   }
@@ -402,13 +409,14 @@ class QCamera extends Nanocomponent {
 }
 
 class QNone extends Nanocomponent {
-  constructor (state, emit, qScore, qCamera) {
+  constructor (state, emit, qScore, qCamera, qSubmit) {
     super()
     this.state = state
     this.emit = emit
     this.handleClick = this.handleClick.bind(this)
     this.qScore = qScore
     this.qCamera = qCamera
+    this.qSubmit = qSubmit
   }
 
   createElement () {
@@ -431,6 +439,9 @@ class QNone extends Nanocomponent {
     var score = this.state.score === 10 ? 3 : 10
 
     this.emit('state:score', score)
+    this.emit('state:isAble', score === 10)
+    this.emit('state:photo', null)
+    this.qSubmit.render()
     this.qScore.render()
     this.qCamera.render()
     this.render()
@@ -442,12 +453,13 @@ class QNone extends Nanocomponent {
 }
 
 class QScore extends Nanocomponent {
-  constructor (state, emit, qCamera) {
+  constructor (state, emit, qCamera, qSubmit) {
     super()
     this.state = state
     this.emit = emit
     this.score = this.score.bind(this)
     this.qCamera = qCamera
+    this.qSubmit = qSubmit
   }
 
   createElement () {
@@ -470,8 +482,12 @@ class QScore extends Nanocomponent {
 
   score (score) {
     return e => {
+      console.log(score === 1)
+      this.emit('state:isAble', score === 1)
       this.emit('state:score', score)
+      this.emit('state:photo', null)
       this.qCamera.render()
+      this.qSubmit.render()
       this.render()
     }
   }
@@ -487,13 +503,13 @@ class Component extends Nanocomponent {
     this.page = 'polling'
     this.unHeightFix = true
     this.state = state
-    this.emit = emit
-    this.qCamera = new QCamera(state, emit)
-    this.qScore = new QScore(state, emit, this.qCamera)
+    this.emit = emit    
     this.qSubmit = new QSubmit(state, emit)
+    this.qCamera = new QCamera(state, emit, this.qSubmit)
+    this.qScore = new QScore(state, emit, this.qCamera, this.qSubmit)    
     this.qkeySubmit = new QkeySubmit(state, emit)
     this.qLogout = new QLogout(state, emit)
-    this.qNone = new QNone(state, emit, this.qScore, this.qCamera)
+    this.qNone = new QNone(state, emit, this.qScore, this.qCamera, this.qSubmit)
     this.qUnpolling = new QUnpolling(state, emit)
     emit('state:id', state.query.id)
   }
