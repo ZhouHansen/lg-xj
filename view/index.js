@@ -80,7 +80,7 @@ class QUnpolling extends Nanocomponent {
                   }
 
                   return html`
-                    <li class='mr2 dib'>${d.area + d.num}</li>
+                    <li class='mr2 dib'>${d.name + '-' + d.area + d.num}</li>
                   `
                 })
               }
@@ -127,7 +127,7 @@ class QLogout extends Nanocomponent {
     return html`
       <button
         onclick=${this.handleClick}
-        class='fr bn bg-purple-blue h2 br2 white'>
+        class='bn bg-purple-blue h2 br2 white mt5'>
         退出
       </button>
     `
@@ -259,10 +259,7 @@ class QSubmit extends Nanocomponent {
     this.command = {
       loading: this.loading.bind(this),
       goat: () => {
-        setTimeout(() => {
-          var win = window.open('', '_self')
-          win.close()
-        }, 1000)
+
       },
       error: () => {},
       duplication: () => {}
@@ -533,13 +530,13 @@ class Component extends Nanocomponent {
                   </span>
                 </p>
                 <p class='f5 navy'>
-                  ${this.qSubmit.render()}
-                  ${this.qLogout.render()}
+                  ${this.qSubmit.render()}                 
                 </p>
                 ${this.qNone.render()}
                 ${this.qScore.render()}
                 ${this.qCamera.render()}
                 ${this.qUnpolling.render()}
+                ${this.qLogout.render()}
               </section>
             `
           ) :
