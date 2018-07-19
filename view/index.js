@@ -376,7 +376,7 @@ class QCamera extends Nanocomponent {
       var file = e.target.files[0]
       var self = this
       new ImageCompressor(file, {
-        quality: 0.6,
+        quality: 0.2,
         success (blob) {
           var reader = new FileReader()
           reader.onload = function() {
