@@ -101,29 +101,22 @@ module.exports = {
 
     fetch(url('clear'))
     .then(res => res.json())
-    .then(datas => {
+    .then(datas => new Promise((resolve, reject) => {
       var clearDate = datas[0].date
-
-      if (clearDate === yMidnight) {
-        return false
+   
+      if (yMidnight - clearDate < 24 * 1000 * 3600) {
+        reject(false)
+      } else {
+        resolve()
       }
-
-      return fetch(url('photo'))
-    })
-    .then(res => res.json())
-    .then(datas => {
-      datas = datas.filter(d => {
-        return d.date > yMidnight
-      })
-      return datas    
-    })
-    .then(datas => {
-      return fetch(url('photo'), {
+    }))
+    .then(() => {
+      return fetch(url('photo', JSON.stringify({ date: { $lt: yMidnight } })) + '&m=true', {
         method: 'put',
         headers: {
           'Content-type': 'application/json;charset=utf-8'
         },
-        body: JSON.stringify(datas)     
+        body: JSON.stringify([])   
       })
     })
     .then(() => {
