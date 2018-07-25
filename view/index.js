@@ -308,6 +308,7 @@ class QSubmit extends Nanocomponent {
   }
 
   loading () {
+
     var data = {
       id: Number(this.state.id),
       villageId: Number(this.state.villageId),
@@ -328,9 +329,13 @@ class QSubmit extends Nanocomponent {
       this.machineFn('DUPLICATION')()
       return
     }
-
-    postData(data, () => {
+    
+    postData(data, () => { 
+      if (this.hasLoading) {
+        return
+      }                    
       this.machineFn('RESOLVE')()
+      this.hasLoading = true 
     }, () => {
       this.machineFn('REJECT')()
     })
