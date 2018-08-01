@@ -330,12 +330,8 @@ class QSubmit extends Nanocomponent {
       return
     }
     
-    postData(data, () => { 
-      if (this.hasLoading) {
-        return
-      }                    
+    postData(data, () => {                  
       this.machineFn('RESOLVE')()
-      this.hasLoading = true 
     }, () => {
       this.machineFn('REJECT')()
     })

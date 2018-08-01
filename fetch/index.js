@@ -1,5 +1,6 @@
 var host = 'https://api.mlab.com/api/1/databases/my-db1/collections/'
 var apiKey = 'q4vsE-BwyJnqZDJSC_d1240H82QBoKVv'
+var hasPost = false
 
 module.exports = {
   postKey (q, resolve, reject) {
@@ -29,6 +30,13 @@ module.exports = {
     if (pollingData.photo) {
       pollingData.photo = true
     }
+
+    if (hasPost) {
+      resolve()
+      return
+    }
+
+    hasPost = true
 
     fetch(url('polling'), {
       method: 'post',
@@ -90,8 +98,14 @@ module.exports = {
         body: JSON.stringify(village)
       })
     })
-    .then(resolve)
-    .catch(reject)
+    .then(() => {
+      hasPost = true
+      resolve()
+    })
+    .catch(() => {
+      hasPost = false
+      reject()      
+    })
   },
 
   clearImage () {
